@@ -93,7 +93,7 @@ let Layer = class {
 			if (this.objects.length > this.max) {
 				this.layout.game.stop();
 				alert(`Object amount reached limit (${this.objects.length}/${this.max}) on layer "${this.name}"`);
-				window.postMessage("close");
+				window.close();
 			}
 		}
 

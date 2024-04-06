@@ -8,14 +8,11 @@ function createWindow () {
 		title: "Team Fortress 2D",
 		width: 800,
 		height: 600,
-		autoHideMenuBar: config.autoHideMenuBar
-	});
-
-	win.addListener("close", (e) => {
-		win.close();
+		autoHideMenuBar: config.autoHideMenuBar,
+		backgroundColor: "black"
 	});
 	
-	win.addListener("set-title", (e, title) => {
+	win.addListener("set-title", (title) => {
 		win.setTitle(title);
 	});
 
