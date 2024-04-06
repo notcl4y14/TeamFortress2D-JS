@@ -1,0 +1,12 @@
+{
+	"name": "teamfortress2d",
+	"version": "1.0.0",
+	"description": "Just a TF2 clone but it's 2D",
+	"main": "main.js",
+	"scripts": {
+		"run": "electron ."
+	},
+	"devDependencies": {
+		"electron": "^29.2.0"
+	}
+}
