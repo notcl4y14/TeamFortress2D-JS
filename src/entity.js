@@ -181,10 +181,10 @@ let Merc = class extends Entity3D {
 			switch (other.constructor.name) {
 				case "Bullet":
 					this.health -= other.damage;
-					this.velocity.x += Math.cos(utils_DegreeToRadian(other.angleX)) * other.damage;
-					this.velocity.z += Math.sin(utils_DegreeToRadian(other.angleX)) * other.damage;
+					this.velocity.x += Math.cos(utils_ToRadians(other.angleX)) * other.damage;
+					this.velocity.z += Math.sin(utils_ToRadians(other.angleX)) * other.damage;
 					this.layer.remove(other);    // In case if it doesn't get deleted, somehow
-					game.assets.sounds.hitsound.play();
+					game.playSound("hitsound");
 					break;
 			}
 		}
@@ -258,22 +258,24 @@ let Bullet = class extends Entity3D {
 	// =================================================
 
 		OnCollision (other) {
+			if (other.constructor.name == "Bullet") return;
+
 			this.layer.remove(this);
 		}
 
 	// =================================================
 
 		update (game) {
-			let dirX = Math.cos(utils_DegreeToRadian(this.angleX)) * this.speed;
-			let dirZ = Math.sin(utils_DegreeToRadian(this.angleX)) * this.speed;
+			let dirX = Math.cos(utils_ToRadians(this.angleX)) * this.speed;
+			let dirZ = Math.sin(utils_ToRadians(this.angleX)) * this.speed;
 
 			this.x += dirX;
 			this.z += dirZ;
 		}
 
 		render (context) {
-			let dirX = Math.cos(utils_DegreeToRadian(this.angleX)) * this.speed;
-			let dirZ = Math.sin(utils_DegreeToRadian(this.angleX)) * this.speed;
+			let dirX = Math.cos(utils_ToRadians(this.angleX)) * this.speed;
+			let dirZ = Math.sin(utils_ToRadians(this.angleX)) * this.speed;
 
 			context.strokeStyle = "yellow";
 			context.lineWidth = 4;

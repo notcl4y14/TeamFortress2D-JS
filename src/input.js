@@ -5,6 +5,9 @@ let Input = class {
 		constructor () {
 			this.keys = {};
 			this.mouse = {};
+			
+			this.mouseX = 0;
+			this.mosueY = 0;
 
 			window.onkeydown = (key) => {
 				if (!this.keys[key.code]) {
@@ -16,6 +19,19 @@ let Input = class {
 
 			window.onkeyup = (key) => {
 				this.keys[key.code].unpress();
+			}
+
+			window.onmousedown = (mouse) => {
+				this.mouse[mouse.button] = true;
+			}
+
+			window.onmouseup = (mouse) => {
+				this.mouse[mouse.button] = false;
+			}
+
+			window.onmousemove = (mouse) => {
+				this.mouseX = mouse.x;
+				this.mouseY = mouse.y;
 			}
 		}
 	
@@ -34,6 +50,14 @@ let Input = class {
 		isKeyPressed (key) {
 			if (!this.keys[key]) return false;
 			return this.keys[key].down && this.keys[key].held <= 1;
+		}
+
+		isMouseDown (button) {
+			return this.mouse[button] === true;
+		}
+
+		isMouseUp (button) {
+			return this.mouse[button] == false;
 		}
 
 	// =================================================

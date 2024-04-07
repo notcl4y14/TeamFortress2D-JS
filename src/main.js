@@ -14,8 +14,8 @@ let Game = class {
 					hitsound: new Audio("assets/hitsound.mp3")
 				}
 			};
-
-			// this.assets.sounds.hitsound.play();
+			
+			this.soundBuffer = [];
 
 			this.input = new Input();
 			this.layout = new Layout([], this);
@@ -45,6 +45,30 @@ let Game = class {
 		}
 		
 	// =================================================
+
+		playSound (name) {
+			let sound = this.assets.sounds[name];
+			let index = this.soundBuffer.push( sound.cloneNode() ) - 1;
+			this.soundBuffer[index].play();
+			
+			// this.soundBuffer[index].onplayed = () => {
+			// 	game.soundBuffer.splice(index, 1);
+			// }
+
+			this.checkSound( this.soundBuffer[index] );
+		}
+
+		async checkSound (sound) {
+			if (sound.played) {
+				let index = this.soundBuffer.indexOf(sound);
+				this.soundBuffer.splice(index, 1);
+				return;
+			}
+
+			window.requestAnimationFrame(() => this.checkSound(sound));
+		}
+		
+	// =================================================
 	
 		async start () {
 			this.running = true;
@@ -68,6 +92,32 @@ let Game = class {
 
 		update () {
 			this.ticks++;
+
+			if (this.input.isMouseDown(0)) {
+				let l_main = this.layout.getLayer("main");
+
+				let mouseX = this.input.mouseX;
+				let mouseY = this.input.mouseY;
+
+				let x = mouseX;
+				let y = 0;
+				let z = mouseY;
+
+				let speed = 10;
+				let damage = 10;
+
+				let angle = Math.atan2(
+					l_main.objects[0].z - mouseY,
+					l_main.objects[0].x - mouseX
+				);
+
+				angle = utils_ToDegrees(angle);
+				
+				let entity = new Bullet(x, y, z, speed, damage, angle, 0);
+
+				l_main.add( entity );
+			}
+
 			this.layout.update(this);
 		}
 		
@@ -76,6 +126,10 @@ let Game = class {
 			context.fillRect(0, 0, context.canvas.width, context.canvas.height);
 
 			this.layout.render(context);
+
+			context.fillStyle = "black";
+			context.fillText("Left mouse button to spawn bullets", 500, 100);
+			context.fillText("Be careful, this might be loud", 500, 110);
 		}
 	
 	// =================================================
