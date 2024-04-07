@@ -186,6 +186,10 @@ let Merc = class extends Entity3D {
 					this.layer.remove(other);    // In case if it doesn't get deleted, somehow
 					game.playSound("hitsound");
 					break;
+				case "HealthPack":
+					this.health += other.health;
+					this.layer.remove(other);
+					break;
 			}
 		}
 
@@ -287,6 +291,30 @@ let Bullet = class extends Entity3D {
 			context.lineWidth = 1;
 
 			// this.collider.render(context);
+		}
+
+	// =================================================
+}
+
+let HealthPack = class extends Entity3D {
+	
+	// =================================================
+
+		constructor (x, y, z, health = 50) {
+			super (x, y, z, 10, 10, 10, 0, 0);
+			this.health = health;
+		}
+
+	// =================================================
+
+		OnCollision (other) {}
+
+	// =================================================
+
+		update (game) {}
+
+		render (context) {
+			this.collider.render(context);
 		}
 
 	// =================================================

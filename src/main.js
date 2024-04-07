@@ -27,6 +27,8 @@ let Game = class {
 				l_main.add( new Merc(10, 0, 10, 0) );
 				l_main.add( new Bullet(500, 0, 500, 10, 10, 180 + 45, 0) );
 
+				l_main.add( new HealthPack(500, 0, 200) );
+
 				let l_gui = this.layout.addLayer(10, "GUI");
 				l_gui.add( new HealthBar(
 					2,
