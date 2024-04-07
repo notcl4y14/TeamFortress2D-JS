@@ -62,7 +62,22 @@ let Layout = class {
 	// =================================================
 
 		update (game) {
-			this.layers.forEach ((layer) => layer.update(game));
+			this.layers.forEach ((layer) => {
+				// Collision check
+				for (let object of layer.objects) {
+					for (let object2 of layer.objects) {
+						if (object == object2) continue;
+						let distance = utils_getDistance(object.x, object.y, object2.x, object2.y);
+						if (distance > object.collider.collisionRadius) continue;
+
+						if (object.collider.intersects(object2.collider)) {
+							object.OnCollision(object2);
+						}
+					}
+				}
+
+				layer.update(game)
+			});
 		}
 
 		render (game) {
@@ -94,7 +109,10 @@ let Layer = class {
 				this.layout.game.stop();
 				alert(`Object amount reached limit (${this.objects.length}/${this.max}) on layer "${this.name}"`);
 				window.close();
+				throw `Object amount reached limit (${this.objects.length}/${this.max}) on layer "${this.name}"`;
 			}
+
+			this.objects[this.objects.length - 1].layer = this;
 		}
 
 		remove (obj) {

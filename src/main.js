@@ -13,9 +13,26 @@ let Game = class {
 			this.layout = new Layout([], this);
 			
 			(() => {
+				let game = this;
+
 				let l_main = this.layout.addLayer(0, "main");
 				l_main.add( new Merc(10, 0, 10, 0) );
-				l_main.add( new Bullet(50, 0, 50, 0, 0) );
+				l_main.add( new Bullet(200, 0, 200, 2, 10, 180 + 45, 0) );
+
+				let l_gui = this.layout.addLayer(10, "GUI");
+				l_gui.add( new HealthBar(
+					2,
+					game.canvas.height - 50,
+					10,
+					50,
+					l_main.objects[0],
+					function (game) {
+						return 2;
+					},
+					function (game) {
+						return game.canvas.height - 52;
+					}
+				) );
 			})();
 		}
 		
@@ -47,7 +64,7 @@ let Game = class {
 		}
 		
 		render (context) {
-			context.fillStyle = "black";
+			context.fillStyle = "cornflowerblue";
 			context.fillRect(0, 0, context.canvas.width, context.canvas.height);
 
 			this.layout.render(context);

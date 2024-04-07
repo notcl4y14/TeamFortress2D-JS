@@ -22,20 +22,6 @@ function createWindow () {
 app.whenReady().then(() => {
 	createWindow();
 
-	// ipc.on("close", (e) => {
-	// 	let webContents = e.sender;
-	// 	let win = BrowserWindow.fromWebContents(webContents);
-		
-	// 	win.close();
-	// });
-	
-	// ipc.on("set-title", (e, title) => {
-	// 	let webContents = e.sender;
-	// 	let win = BrowserWindow.fromWebContents(webContents);
-		
-	// 	win.setTitle(title);
-	// });
-
 	app.on('activate', () => {
 		if (BrowserWindow.getAllWindows().length === 0) {
 			createWindow();

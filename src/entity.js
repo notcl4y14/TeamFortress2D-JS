@@ -1,8 +1,70 @@
-let Entity = class {
+let Entity2D = class {
+	
+	// =================================================
+
+		constructor (x, y, w, h, angle = 0) {
+			this.collider = new Collider2D(x, y, w, h, angle, { x: w / 2, y: h, z: 0 });
+
+			this.velocity = {
+				x: 0,
+				y: 0
+			};
+
+			this.acceleration = 0;
+			this.friction = 0;
+			this.speedMax = 0;
+
+			this.layer = null;
+		}
+
+	// =================================================
+
+		get x () { return this.collider.x; }
+		get y () { return this.collider.y; }
+		get width () { return this.collider.width; }
+		get height () { return this.collider.height; }
+		get angle () { return this.collider.angleX; }
+
+		set x (val) { this.collider.x = val; }
+		set y (val) { this.collider.y = val; }
+		set width (val) { this.collider.width = val; }
+		set height (val) { this.collider.height = val; }
+		set angle (val) { this.collider.angle = val; }
+
+	// =================================================
+
+		applyGravity (gravity) {
+			this.velocity.x += gravity.x;
+			this.velocity.y += gravity.y;
+		}
+
+		applyVelocity () {
+			this.x += this.velocity.x;
+			this.y += this.velocity.y;
+		}
+
+	// =================================================
+
+		OnCollision (other) {}
+
+	// =================================================
+
+		update (game) {}
+
+		render (context) {
+			this.collider.render(context);
+		}
+
+	// =================================================
+
+}
+
+let Entity3D = class extends Entity2D {
 	
 	// =================================================
 
 		constructor (x, y, z, w, h, l, angleX = 0, angleY = 0) {
+			super();
 			this.collider = new Collider3D(x, y, z, w, h, l, angleX, angleY, { x: w / 2, y: h, z: 0 });
 
 			this.velocity = {
@@ -17,6 +79,8 @@ let Entity = class {
 
 			this.health = 0;
 			this.healthMax = 0;
+
+			this.layer = null;
 		}
 
 	// =================================================
@@ -27,6 +91,8 @@ let Entity = class {
 		get width () { return this.collider.width; }
 		get height () { return this.collider.height; }
 		get length () { return this.collider.length; }
+		get angleX () { return this.collider.angleX; }
+		get angleY () { return this.collider.angleY; }
 
 		set x (val) { this.collider.x = val; }
 		set y (val) { this.collider.y = val; }
@@ -34,6 +100,8 @@ let Entity = class {
 		set width (val) { this.collider.width = val; }
 		set height (val) { this.collider.height = val; }
 		set length (val) { this.collider.length = val; }
+		set angleX (val) { this.collider.angleX = val; }
+		set angleY (val) { this.collider.angleY = val; }
 
 	// =================================================
 
@@ -51,6 +119,10 @@ let Entity = class {
 
 	// =================================================
 
+		OnCollision (other) {}
+
+	// =================================================
+
 		update (game) {}
 
 		render (context) {
@@ -61,7 +133,7 @@ let Entity = class {
 
 }
 
-let Merc = class extends Entity {
+let Merc = class extends Entity3D {
 	
 	// =================================================
 
@@ -105,11 +177,24 @@ let Merc = class extends Entity {
 
 	// =================================================
 
+		OnCollision (other) {
+			switch (other.constructor.name) {
+				case "Bullet":
+					this.health -= other.damage;
+					this.velocity.x += Math.cos(utils_DegreeToRadian(other.angleX)) * other.damage;
+					this.velocity.z += Math.sin(utils_DegreeToRadian(other.angleX)) * other.damage;
+					this.layer.remove(other);    // In case if it doesn't get deleted, somehow
+					break;
+			}
+		}
+
+	// =================================================
+
 		update (game) {
-			let left = game.input.isKeyDown("ArrowLeft");
-			let right = game.input.isKeyDown("ArrowRight");
-			let up = game.input.isKeyDown("ArrowUp");
-			let down = game.input.isKeyDown("ArrowDown");
+			let left = game.input.isKeyDown("KeyA");
+			let right = game.input.isKeyDown("KeyD");
+			let up = game.input.isKeyDown("KeyW");
+			let down = game.input.isKeyDown("KeyS");
 			let jump = game.input.isKeyPressed("Space");
 
 			let dirX = (right - left);
@@ -159,22 +244,30 @@ let Merc = class extends Entity {
 	// =================================================
 }
 
-let Bullet = class extends Entity {
+let Bullet = class extends Entity3D {
 	
 	// =================================================
 
-		constructor (x, y, z, angleX = 0, angleY = 0) {
+		constructor (x, y, z, speed = 40, damage = 4, angleX = 0, angleY = 0) {
 			super (x, y, z, 10, 10, 10, angleX, angleY);
+			this.speed = speed;
+			this.damage = damage;
+		}
+
+	// =================================================
+
+		OnCollision (other) {
+			this.layer.remove(this);
 		}
 
 	// =================================================
 
 		update (game) {
-			this.x += 1;
+			let dirX = Math.cos(utils_DegreeToRadian(this.angleX)) * this.speed;
+			let dirZ = Math.sin(utils_DegreeToRadian(this.angleX)) * this.speed;
 
-			if (this.collider.intersects(game.layout.layers[0].objects[0].collider)) {
-				game.layout.layers[0].objects.splice(1, 1);
-			}
+			this.x += dirX;
+			this.z += dirZ;
 		}
 
 		render (context) {
@@ -182,4 +275,45 @@ let Bullet = class extends Entity {
 		}
 
 	// =================================================
+}
+
+let HealthBar = class extends Entity2D {
+
+	// =================================================
+
+		constructor (x, y, width, height, target = null, originX = function() { return this.x; }, originY = function() { return this.y; }) {
+			super(x, y, width, height, 0);
+			this.target = target;
+			this.originX = originX;
+			this.originY = originY;
+		}
+
+	// =================================================
+
+		update (game) {
+			this.x = this.originX(game);
+			this.y = this.originY(game);
+		}
+		
+		render (context) {
+			context.fillStyle = "black";
+			context.fillRect(this.x, this.y, this.width, this.height);
+			
+			context.strokeStyle = "white";
+			context.strokeRect(this.x, this.y, this.width, this.height);
+
+			context.fillStyle = "green";
+			context.fillRect(
+				this.x + 2,
+				this.y + this.height - 2,
+				this.width - 4,
+				(this.target.health / this.target.healthMax * this.height - 4) * -1
+			);
+
+			context.fillStyle = "white";
+			context.fillText(this.target.health, this.x, this.y);
+		}
+
+	// =================================================
+	
 }
