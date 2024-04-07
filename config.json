@@ -1,3 +1,5 @@
 {
-	"autoHideMenuBar": false
+	"autoHideMenuBar": true,
+	"width": 720,
+	"height": 480
 }

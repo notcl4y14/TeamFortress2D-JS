@@ -6,8 +6,8 @@ function createWindow () {
 
 	let win = new BrowserWindow({
 		title: "Team Fortress 2D",
-		width: 800,
-		height: 600,
+		width: config.width,
+		height: config.height,
 		autoHideMenuBar: config.autoHideMenuBar,
 		backgroundColor: "black"
 	});

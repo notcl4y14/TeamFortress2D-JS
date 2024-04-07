@@ -23,7 +23,7 @@ let Entity2D = class {
 		get y () { return this.collider.y; }
 		get width () { return this.collider.width; }
 		get height () { return this.collider.height; }
-		get angle () { return this.collider.angleX; }
+		get angle () { return this.collider.angle; }
 
 		set x (val) { this.collider.x = val; }
 		set y (val) { this.collider.y = val; }
@@ -177,13 +177,14 @@ let Merc = class extends Entity3D {
 
 	// =================================================
 
-		OnCollision (other) {
+		OnCollision (other, game) {
 			switch (other.constructor.name) {
 				case "Bullet":
 					this.health -= other.damage;
 					this.velocity.x += Math.cos(utils_DegreeToRadian(other.angleX)) * other.damage;
 					this.velocity.z += Math.sin(utils_DegreeToRadian(other.angleX)) * other.damage;
 					this.layer.remove(other);    // In case if it doesn't get deleted, somehow
+					game.assets.sounds.hitsound.play();
 					break;
 			}
 		}
@@ -271,7 +272,19 @@ let Bullet = class extends Entity3D {
 		}
 
 		render (context) {
-			this.collider.render(context);
+			let dirX = Math.cos(utils_DegreeToRadian(this.angleX)) * this.speed;
+			let dirZ = Math.sin(utils_DegreeToRadian(this.angleX)) * this.speed;
+
+			context.strokeStyle = "yellow";
+			context.lineWidth = 4;
+			context.beginPath();
+			context.moveTo(this.x - dirX, this.z - dirZ);
+			context.lineTo(this.x + dirX, this.z + dirZ);
+			context.stroke();
+			context.closePath();
+			context.lineWidth = 1;
+
+			// this.collider.render(context);
 		}
 
 	// =================================================
@@ -281,7 +294,7 @@ let HealthBar = class extends Entity2D {
 
 	// =================================================
 
-		constructor (x, y, width, height, target = null, originX = function() { return this.x; }, originY = function() { return this.y; }) {
+		constructor (x, y, width, height, target = null, originX, originY) {
 			super(x, y, width, height, 0);
 			this.target = target;
 			this.originX = originX;
@@ -291,8 +304,8 @@ let HealthBar = class extends Entity2D {
 	// =================================================
 
 		update (game) {
-			this.x = this.originX(game);
-			this.y = this.originY(game);
+			if (this.originX) this.x = this.originX(game);
+			if (this.originY) this.y = this.originY(game);
 		}
 		
 		render (context) {

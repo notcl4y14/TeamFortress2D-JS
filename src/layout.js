@@ -71,7 +71,7 @@ let Layout = class {
 						if (distance > object.collider.collisionRadius) continue;
 
 						if (object.collider.intersects(object2.collider)) {
-							object.OnCollision(object2);
+							object.OnCollision(object2, game);
 						}
 					}
 				}

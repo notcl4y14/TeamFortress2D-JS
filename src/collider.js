@@ -40,7 +40,6 @@ let Collider2D = class {
 		render (context, color = "#ffffff") {
 			context.strokeStyle = color;
 			context.strokeRect(this.x, this.y, this.width, this.height);
-			// this.renderCollisionRadius(context, color);
 		}
 		
 		renderCollisionRadius (context, color = "#ffffff") {
@@ -101,7 +100,6 @@ let Collider3D = class extends Collider2D {
 			context.strokeRect(x, z + y, this.width, this.height);
 
 			context.strokeRect(x, z, this.width, this.length);
-			this.renderCollisionRadius(context, color);
 		}
 		
 		renderCollisionRadius (context, color = "#ffffff") {

@@ -9,6 +9,14 @@ let Game = class {
 			this.running = false;
 			this.ticks = 0;
 
+			this.assets = {
+				sounds: {
+					hitsound: new Audio("assets/hitsound.mp3")
+				}
+			};
+
+			// this.assets.sounds.hitsound.play();
+
 			this.input = new Input();
 			this.layout = new Layout([], this);
 			
@@ -17,7 +25,7 @@ let Game = class {
 
 				let l_main = this.layout.addLayer(0, "main");
 				l_main.add( new Merc(10, 0, 10, 0) );
-				l_main.add( new Bullet(200, 0, 200, 2, 10, 180 + 45, 0) );
+				l_main.add( new Bullet(500, 0, 500, 10, 10, 180 + 45, 0) );
 
 				let l_gui = this.layout.addLayer(10, "GUI");
 				l_gui.add( new HealthBar(
