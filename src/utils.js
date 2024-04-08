@@ -21,6 +21,8 @@ let utils_ToDegrees = function (rad) {
 	return rad * 180 / Math.PI;
 }
 
-// let utils_NoRef = function (value) {
-// 	return JSON.parse(JSON.stringify(value));
-// }
+let utils_loadImage = function (src) {
+	let img = new Image();
+	img.src = src;
+	return img;
+}
