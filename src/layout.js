@@ -122,6 +122,11 @@ let Layer = class {
 	// =================================================
 
 		update (game) {
+			// this.objects.sort(function (a1, a2) {
+			// 	if (!a1.z && !a2.z) return;
+			// 	return a1.z - a2.z;
+			// });
+
 			this.objects.forEach ((obj) => obj.update(game));
 		}
 

@@ -24,5 +24,6 @@ let utils_ToDegrees = function (rad) {
 let utils_loadImage = function (src) {
 	let img = new Image();
 	img.src = src;
+	// img.style.imageRendering = "pixelated";
 	return img;
 }

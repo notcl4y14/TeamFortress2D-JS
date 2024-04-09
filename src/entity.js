@@ -328,28 +328,9 @@ let Bullet = class extends Entity3D {
 
 let HealthPack = class extends Entity3D {
 	constructor (position, health = 50) {
-		super (position, new Dim3D(10, 10, 10), new Position2D(0, 0));
+		super (position, new Dim3D(32, 10, 24), new Position2D(0, 0));
 		this.health = health;
-	};
-
-	// =================================================
-
-	OnCollision (other) {};
-
-	// =================================================
-
-	update (game) {};
-
-	render (context) {
-		this.collider.render(context);
-	};
-};
-
-let AmmoPack = class extends Entity3D {
-	constructor (position, ammo = 50) {
-		super (position, new Dim3D(10, 10, 10), new Position2D(0, 0));
-		this.ammo = ammo;
-		this.sprite = utils_loadImage("assets/ammo_pack.png");
+		this.sprite = game.getImage("medkit");
 	};
 
 	// =================================================
@@ -366,8 +347,48 @@ let AmmoPack = class extends Entity3D {
 		let x = this.x - this.collider.pivot.x;
 		let y = this.y - this.collider.pivot.y;
 		let z = this.z - this.collider.pivot.z;
+		let t = Math.sin(game.ticks / 20) * 4 - 2;
 
-		context.drawImage(this.sprite, x, z + y);
+		context.fillStyle = "rgba(0,0,0,0.5)";
+		context.beginPath();
+		context.arc(this.x, this.z + 5, 12.5, 0, 2 * Math.PI);
+		context.fill();
+		context.closePath();
+
+		context.drawImage(this.sprite, x, z + y - t);
+	};
+};
+
+let AmmoPack = class extends Entity3D {
+	constructor (position, ammo = 50) {
+		super (position, new Dim3D(32, 10, 24), new Position2D(0, 0));
+		this.ammo = ammo;
+		this.sprite = game.getImage("ammo_pack");
+	};
+
+	// =================================================
+
+	OnCollision (other) {};
+
+	// =================================================
+
+	update (game) {};
+
+	render (context) {
+		if (!this.sprite.complete) return;
+
+		let x = this.x - this.collider.pivot.x;
+		let y = this.y - this.collider.pivot.y;
+		let z = this.z - this.collider.pivot.z;
+		let t = Math.sin(game.ticks / 20) * 4 - 2;
+
+		context.fillStyle = "rgba(0,0,0,0.5)";
+		context.beginPath();
+		context.arc(this.x, this.z + 5, 12.5, 0, 2 * Math.PI);
+		context.fill();
+		context.closePath();
+
+		context.drawImage(this.sprite, x, z + y - t);
 	};
 };
 
@@ -454,6 +475,8 @@ let ScatterGun = class extends Gun {
 		let y = user.y;
 		let z = user.z + dirZ;
 
+		game.playSound("scattergun_shoot");
+
 		for (let i = -1; i <= 1; i++) {
 			let _i = i * 45;
 			this.spawn(
@@ -464,6 +487,15 @@ let ScatterGun = class extends Gun {
 				)
 			);
 		}
+	};
+	
+	reload (user = this.user) {
+		game.playSound("scattergun_reload");
+		if (this.ammo <= 0 || this.carried >= this.carrySize) return;
+		this.ammo -= this.carrySize;
+		let left = this.ammo < 0 ? Math.abs(this.ammo) : 6;
+		this.carried += left;
+		if (this.ammo < 0) this.ammo = 0;
 	};
 
 	// =================================================
