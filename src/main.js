@@ -38,8 +38,16 @@ let Game = class {
 		l_main.add( new Merc( new Position3D(10, 0, 10), 0 ) );
 		l_main.add( new Bullet (new Position3D(500, 0, 500), new Position2D(180 + 45, 0) ) );
 
-		l_main.add( new HealthPack( new Position3D(500, 0, 200) ) );
-		l_main.add( new AmmoPack( new Position3D(540, 0, 200) ) );
+		// Looks like 1 second is 60 ticks, although this might depend on performance
+		// P.S. I used stopwatch to get that :P
+		// P.P.S I decided to grab medkit (3600 ticks which should be 1 minute) the moment 7:58 AM started
+		// Result: it did 1 minute, but with some more ticks. So it's 1 minute and a few seconds or milliseconds
+		// Unless it's performance-dependant
+		let second = 60;
+		let minute = second * 60;
+
+		l_main.add( new Spawner( new Position3D(500, 0, 200), new HealthPack( new Position3D(500, 0, 200) ), minute ) );
+		l_main.add( new Spawner( new Position3D(540, 0, 200), new AmmoPack( new Position3D(540, 0, 200) ), minute ) );
 
 		let l_gui = this.layout.addLayer(10, "GUI");
 		l_gui.add( new HealthBar(

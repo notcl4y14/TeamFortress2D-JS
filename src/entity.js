@@ -13,22 +13,41 @@ let Entity2D = class {
 
 		this.sprite = null;
 
+		this.collisions = [];
 		this.layer = null;
 	};
 
 	// =================================================
 
+	get position () { return this.collider.position; }
 	get x () { return this.collider.x; };
 	get y () { return this.collider.y; };
 	get width () { return this.collider.width; };
 	get height () { return this.collider.height; };
 	get angle () { return this.collider.angle; };
 
+	set position (val) { this.collider.position = val; }
 	set x (val) { this.collider.x = val; };
 	set y (val) { this.collider.y = val; };
 	set width (val) { this.collider.width = val; };
 	set height (val) { this.collider.height = val; };
 	set angle (val) { this.collider.angle = val; };
+
+	// =================================================
+
+	isColliding (object) {
+		if (typeof(object) == "string") {
+			for (let obj of this.collisions) {
+				if (obj.constructor.name == object) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+		
+		return this.collisions.includes(object);
+	}
 
 	// =================================================
 
@@ -324,6 +343,58 @@ let Bullet = class extends Entity3D {
 		context.closePath();
 		context.lineWidth = 1;
 	};
+};
+
+let Spawner = class extends Entity3D {
+	constructor (position, object, timer) {
+		super (position, new Dim3D(32, 10, 24), new Position2D(0, 0));
+		this.object = object;
+
+		// Instant spawn
+		this.timer = timer;
+		this.timerMax = timer;
+	}
+
+	// =================================================
+
+	OnCollision (other) {};
+
+	// =================================================
+
+	update (game) {
+		let object = this.object.constructor.name;
+		let isColliding = this.isColliding(object);
+
+		this.timer++
+
+		if (isColliding) {
+			this.timer = 0;
+		}
+
+		if (this.timer >= this.timerMax) {
+			this.timer = 0;
+
+			// console.log(isColliding);
+
+			// if (!isColliding) {
+			let index = this.layer.add( Object.create(this.object) );
+			index -= 1;
+
+			this.layer.objects[index].position = this.position;
+			// }
+		}
+	};
+
+	render (context, color = "#ffffff") {
+		context.fillStyle = color;
+		this.collider.render(context);
+
+		let x = this.x - this.collider.pivot.x;
+		let y = this.y - this.collider.pivot.y;
+		let z = this.z - this.collider.pivot.z;
+
+		context.fillText(this.timer + "/" + this.timerMax, x, z + y);
+	}
 };
 
 let HealthPack = class extends Entity3D {

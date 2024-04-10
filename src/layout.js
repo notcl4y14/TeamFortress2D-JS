@@ -65,15 +65,21 @@ let Layout = class {
 			this.layers.forEach ((layer) => {
 				// Collision check
 				for (let object of layer.objects) {
+					object.collisions = [];
+
 					for (let object2 of layer.objects) {
 						if (object == object2) continue;
+						
 						let distance = utils_getDistance(object.x, object.y, object2.x, object2.y);
 						if (distance > object.collider.collisionRadius) continue;
 
 						if (object.collider.intersects(object2.collider)) {
 							object.OnCollision(object2, game);
+							object.collisions.push(object2);
 						}
 					}
+					
+					// console.log(object.constructor.name, object.collisions);
 				}
 
 				layer.update(game)
@@ -113,6 +119,7 @@ let Layer = class {
 			}
 
 			this.objects[this.objects.length - 1].layer = this;
+			return this.objects.length;
 		}
 
 		remove (obj) {
