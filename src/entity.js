@@ -334,13 +334,22 @@ let Bullet = class extends Entity3D {
 		let dirX = Math.cos(utils_ToRadians(this.angleX)) * this.speed / 2;
 		let dirZ = Math.sin(utils_ToRadians(this.angleX)) * this.speed / 2;
 
-		context.strokeStyle = "yellow";
 		context.lineWidth = 4;
+
+		context.strokeStyle = "rgba(0,0,0,0.5)";
 		context.beginPath();
 		context.moveTo(this.x - dirX, this.z - dirZ);
 		context.lineTo(this.x + dirX, this.z + dirZ);
 		context.stroke();
 		context.closePath();
+
+		context.strokeStyle = "yellow";
+		context.beginPath();
+		context.moveTo(this.x - dirX, (this.z - dirZ) + this.y);
+		context.lineTo(this.x + dirX, (this.z + dirZ) + this.y);
+		context.stroke();
+		context.closePath();
+		
 		context.lineWidth = 1;
 	};
 };
@@ -543,13 +552,13 @@ let ScatterGun = class extends Gun {
 		angle = utils_ToDegrees(angle);
 
 		let x = user.x + dirX;
-		let y = user.y;
+		let y = user.y - user.height / 2;
 		let z = user.z + dirZ;
 
 		game.playSound("scattergun_shoot");
 
-		for (let i = -1; i <= 1; i++) {
-			let _i = i * 45;
+		for (let i = -2; i <= 2; i++) {
+			let _i = i * 10;
 			this.spawn(
 				new Bullet(
 					new Position3D(x, y, z),
