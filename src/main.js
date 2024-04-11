@@ -35,7 +35,7 @@ let Game = class {
 		let game = this;
 
 		let l_main = this.layout.addLayer(0, "main");
-		l_main.add( new Merc( new Position3D(10, 0, 10), 0 ) );
+		l_main.add( new Merc( new Position3D(20, 10, 20), 0 ) );
 		l_main.add( new Bullet (new Position3D(500, 0, 500), new Position2D(180 + 45, 0) ) );
 
 		// Looks like 1 second is 60 ticks, although this might depend on performance
@@ -48,6 +48,7 @@ let Game = class {
 
 		l_main.add( new Spawner( new Position3D(500, 0, 200), new HealthPack( new Position3D(500, 0, 200) ), minute ) );
 		l_main.add( new Spawner( new Position3D(540, 0, 200), new AmmoPack( new Position3D(540, 0, 200) ), minute ) );
+		l_main.add( new Block( new Position3D(10, 0, 10), new Dim3D(500, 500, 500) ) );
 
 		let l_gui = this.layout.addLayer(10, "GUI");
 		l_gui.add( new HealthBar(

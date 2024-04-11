@@ -1,9 +1,11 @@
 let Entity2D = class {
-	constructor (position, dimensions, angle = 0) {
+	constructor (position, dimensions, angle = 0, pivot = null) {
 		let w = dimensions.width,
 		    h = dimensions.height;
+
+		pivot = pivot || new Position2D( w / 2, h );
 		
-		this.collider = new Collider2D(position, dimensions, angle, new Position2D( w / 2, h ));
+		this.collider = new Collider2D(position, dimensions, angle, pivot);
 
 		this.velocity = new Position2D(0, 0);
 
@@ -35,18 +37,26 @@ let Entity2D = class {
 
 	// =================================================
 
-	isColliding (object) {
+	isColliding (object, func = null) {
 		if (typeof(object) == "string") {
 			for (let obj of this.collisions) {
 				if (obj.constructor.name == object) {
-					return true;
+					if (func) func.call(this, obj);
+					return obj;
 				}
 			}
 
-			return false;
+			return null;
+		} else if (typeof(object) == "object") {
+			for (let obj of this.collisions) {
+				if (object instanceof obj) {
+					if (func) func.call(this, obj);
+					return obj;
+				}
+			}
+
+			return null;
 		}
-		
-		return this.collisions.includes(object);
 	}
 
 	// =================================================
@@ -82,14 +92,16 @@ let Entity2D = class {
 };
 
 let Entity3D = class extends Entity2D {
-	constructor (position, dimensions, angle) {
-		super(position, dimensions);
+	constructor (position, dimensions, angle, pivot = null) {
+		super(position, dimensions, pivot);
 
 		let w = dimensions.width,
 		    h = dimensions.height,
 			l = dimensions.length;
+
+		pivot = pivot || new Position3D( w / 2, h / 2, l / 2 );
 		
-		this.collider = new Collider3D(position, dimensions, angle, new Position3D( w / 2, h, l / 2 ));
+		this.collider = new Collider3D(position, dimensions, angle, pivot);
 
 		this.velocity = new Position3D(0, 0, 0);
 
@@ -281,11 +293,13 @@ let Merc = class extends Entity3D {
 		// Gravity
 		this.applyGravity({x:0, y:0.25, z:0});
 
-		if (this.y > 0) {
-			this.velocity.y = 0;
-			this.y = 0;
-			this.jumps = Merc.Class[this.mercID].jumps;
-		};
+		this.isColliding("Block", (block) => {
+			if (this.velocity.y > 0) {
+				this.velocity.y = 0;
+				this.y = block.y;
+				this.jumps = Merc.Class[this.mercID].jumps;
+			}
+		});
 	};
 
 	render (context) {
@@ -584,6 +598,25 @@ let ScatterGun = class extends Gun {
 		context.fillStyle = "white";
 		context.fillText("ScatterGun", position.x, position.y);
 	};
+};
+
+let Block = class extends Entity3D {
+	constructor (position, dimensions, angle = new Position2D(0, 0)) {
+		super(position, dimensions, angle, new Position3D(0, 0, 0));
+	};
+
+	// =================================================
+	
+	OnCollision (other) {}
+
+	// =================================================
+
+	update (game) {}
+
+	render (context) {
+		// context.fillStyle = "#ffffff";
+		this.collider.render(context);
+	}
 };
 
 let HealthBar = class extends Entity2D {
