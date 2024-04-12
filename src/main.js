@@ -48,31 +48,31 @@ let Game = class {
 
 		l_main.add( new Spawner( new Position3D(500, 0, 200), new HealthPack( new Position3D(500, 0, 200) ), minute ) );
 		l_main.add( new Spawner( new Position3D(540, 0, 200), new AmmoPack( new Position3D(540, 0, 200) ), minute ) );
-		l_main.add( new Block( new Position3D(10, 0, 10), new Dim3D(500, 500, 500) ) );
+		l_main.add( new Block( new Position3D(10, 0, 10), new Dim3D(32, 32, 32) ) );
 
-		let l_gui = this.layout.addLayer(10, "GUI");
-		l_gui.add( new HealthBar(
-			new Position2D(2, game.canvas.height - 50),
-			new Dim2D(10, 50),
-			l_main.objects[0],
-			function (game) {
-				return 2;
-			},
-			function (game) {
-				return game.canvas.height - 52;
-			}
-		) );
-		l_gui.add( new AmmoHUD(
-			new Position2D(40, game.canvas.height - 50),
-			new Dim2D(10, 50),
-			l_main.objects[0].item,
-			function (game) {
-				return 18;
-			},
-			function (game) {
-				return game.canvas.height - 52;
-			}
-		) );
+		// let l_gui = this.layout.addLayer(10, "GUI");
+		// l_gui.add( new HealthBar(
+		// 	new Position2D(2, game.canvas.height - 50),
+		// 	new Dim2D(10, 50),
+		// 	l_main.objects[0],
+		// 	function (game) {
+		// 		return 2;
+		// 	},
+		// 	function (game) {
+		// 		return game.canvas.height - 52;
+		// 	}
+		// ) );
+		// l_gui.add( new AmmoHUD(
+		// 	new Position2D(40, game.canvas.height - 50),
+		// 	new Dim2D(10, 50),
+		// 	l_main.objects[0].item,
+		// 	function (game) {
+		// 		return 18;
+		// 	},
+		// 	function (game) {
+		// 		return game.canvas.height - 52;
+		// 	}
+		// ) );
 	}
 		
 	// =================================================
@@ -139,11 +139,11 @@ let Game = class {
 
 		this.layout.render(context);
 
-		let ammo = this.layout.getLayer("main").objects[0].item.ammo;
-		let carried = this.layout.getLayer("main").objects[0].item.carried;
+		// let ammo = this.layout.getLayer("main").objects[0].item.ammo;
+		// let carried = this.layout.getLayer("main").objects[0].item.carried;
 
-		context.fillStyle = "black";
-		context.fillText(ammo + ":" + carried, 0, 10);
+		// context.fillStyle = "black";
+		// context.fillText(ammo + ":" + carried, 0, 10);
 
 		context.fillText("Volume: " + this.settings.volume * 100 + "%", 350, 100);
 		context.fillText("To change it: open console and type `game.settings.volume = 0.50`", 350, 110);

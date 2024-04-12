@@ -441,7 +441,7 @@ let HealthPack = class extends Entity3D {
 		let x = this.x - this.collider.pivot.x;
 		let y = this.y - this.collider.pivot.y;
 		let z = this.z - this.collider.pivot.z;
-		let t = Math.sin(game.ticks / 20) * 4 - 2;
+		let t = Math.sin(game.ticks / 20) * 4;
 
 		context.fillStyle = "rgba(0,0,0,0.5)";
 		context.beginPath();
@@ -474,7 +474,7 @@ let AmmoPack = class extends Entity3D {
 		let x = this.x - this.collider.pivot.x;
 		let y = this.y - this.collider.pivot.y;
 		let z = this.z - this.collider.pivot.z;
-		let t = Math.sin(game.ticks / 20) * 4 - 2;
+		let t = Math.sin(game.ticks / 20) * 4;
 
 		context.fillStyle = "rgba(0,0,0,0.5)";
 		context.beginPath();
