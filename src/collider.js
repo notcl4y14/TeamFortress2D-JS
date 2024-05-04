@@ -1,5 +1,5 @@
 let Collider2D = class {
-	constructor (position, dimensions, angle = 0, pivot = new Position2D(0, 0)) {
+	constructor (position, dimensions, angle = 0, pivot = new Point2D(0, 0)) {
 		this.position = position;
 		this.dimensions = dimensions;
 		this.angle = angle;
@@ -17,10 +17,6 @@ let Collider2D = class {
 	set y (val) { this.position.y = val; };
 	set width (val) { this.dimensions.width = val; };
 	set height (val) { this.dimensions.height = val; };
-
-	get collisionRadius () {
-		return 4 + this.width;
-	};
 	
 	// =================================================
 
@@ -46,18 +42,10 @@ let Collider2D = class {
 		context.strokeStyle = color;
 		context.strokeRect(this.x, this.y, this.width, this.height);
 	};
-	
-	renderCollisionRadius (context, color = "#ffffff") {
-		context.strokeStyle = color;
-		context.beginPath();
-		context.arc(this.x, this.y, this.collisionRadius, 0, 2 * Math.PI);
-		context.stroke();
-		context.closePath();
-	};
 };
 
 let Collider3D = class extends Collider2D {
-	constructor (position, dimensions, angle = new Position2D(0, 0), pivot = new Position3D(0, 0, 0)) {
+	constructor (position, dimensions, angle = new Point2D(0, 0), pivot = new Point3D(0, 0, 0)) {
 		super(position, dimensions, angle, pivot);
 	};
 	
@@ -108,13 +96,5 @@ let Collider3D = class extends Collider2D {
 		context.strokeRect(x, z + y, this.width, this.height);
 
 		context.strokeRect(x, z, this.width, this.length);
-	};
-	
-	renderCollisionRadius (context, color = "#ffffff") {
-		context.strokeStyle = color;
-		context.beginPath();
-		context.arc(this.x, this.z, this.collisionRadius, 0, 2 * Math.PI);
-		context.stroke();
-		context.closePath();
 	};
 };

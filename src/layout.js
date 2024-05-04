@@ -60,15 +60,18 @@ let Layout = class {
 
 	update (game) {
 		for (let layer of this.layers) {
-			layer.forEach((x, y) => {
-				layer.forEachInTile(x, y, (object, tile) => {
-					object.collisions = [];
+			if (!layer) continue;
+			
+			layer.objects.forEach((object) => {
+				object.collisions = [];
 
-					for (let object2 of tile) {
-						if (object == object2) continue;
+				layer.objects.forEach((object2) => {
+					if (object != object2) {
 						this.checkCollisions(object, object2);
 					}
 				});
+
+				object.update(game);
 			});
 		}
 	}
@@ -81,10 +84,7 @@ let Layout = class {
 
 	checkCollisions(a, b) {
 		if (a == b) return;
-					
-		let distance = utils_getDistance(a.x, a.y, b.x, b.y);
-		if (distance > a.collider.collisionRadius) return;
-
+		
 		if (a.collider.intersects(b.collider)) {
 			a.OnCollision(b, game);
 			a.collisions.push(b);
@@ -93,66 +93,20 @@ let Layout = class {
 }
 
 let Layer = class {
-	constructor (name, tileWidth = 16, tileHeight = 16, gridWidth = 64, gridHeight = 64, max = 1024) {
+	constructor (name, max = 1024) {
 		this.name = name;
-		this.grid = [];
-		this.tileWidth = tileWidth;
-		this.tileHeight = tileHeight;
-		this.gridWidth = gridWidth;
-		this.gridHeight = gridHeight;
+		this.objects = [];
 		this.max = max;
-
-		this.generateGrid();
 		
 		this.layout = null;
 	}
-	
-	// =================================================
-
-	generateGrid () {
-		for (let y = 0; y < this.tileHeight; y++) {
-			this.grid[y] = [];
-
-			for (let x = 0; x < this.tileWidth; x++) {
-				this.grid[y][x] = [];
-			}
-		}
-	}
-	
-	getTile (x, y) {
-		return this.grid[y][x];
-	}
-	
-	forEach (func) {
-		for (let y = 0; y < this.tileHeight; y++)
-		{
-			for (let x = 0; x < this.tileWidth; x++)
-			{
-				func(x, y);
-			}
-		}
-	}
-
-	forEachInTile (x, y, func) {
-		let tile = this.getTile(x, y);
-		for (let object of tile) func(object, tile);
-	}
-
 	// =================================================
 
 	add (obj) {
-		let gridX = Math.floor(obj.x / this.tileWidth);
-		let gridY = Math.floor(obj.y / this.tileHeight);
+		this.objects.push(obj);
+		obj.layer = this;
 
-		let tile = this.getTile(gridX, gridY);
-		if (!tile) {
-			this.grid[gridY][gridX] = [];
-			tile = this.grid[gridY][gridX];
-		}
-		tile.push(obj);
-
-		tile[tile.length - 1].layer = this;
-		return tile.length;
+		return this.objects.length;
 	}
 
 	remove (obj) {
@@ -162,35 +116,10 @@ let Layer = class {
 	// =================================================
 
 	update (game) {
-		for (let y = 0; y < this.grid.length; y++)
-		{
-			for (let x = 0; x < this.grid[y].length; x++)
-			{
-				let tile = this.getTile(x, y);
-				for (let object of tile)
-				{
-					object.update();
-
-					let gridX = Math.floor(object.x / this.tileWidth);
-					let gridY = Math.floor(object.y / this.tileHeight);
-					let outOfTile = gridX != x || gridY != y;
-
-					if (outOfTile)
-					{
-						let tempObject = object;
-						let index = tile.indexOf(object);
-						tile.splice(index, 1);
-
-						this.getTile(gridX, gridY).push( tempObject );
-					}
-				}
-			}
-		}
+		this.objects.forEach((obj) => obj.update());
 	}
 
 	render (context) {
-		this.forEach((x, y) => {
-			this.forEachInTile(x, y, (object) => object.render(context));
-		});
+		this.objects.forEach((obj) => obj.render(context));
 	}
 }

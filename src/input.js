@@ -1,10 +1,10 @@
 let Input = class {
 	constructor () {
-		this.keys = {};;
-		this.mouse = {};;
+		this.keys = {};
+		this.mouse = {};
 		
-		this.mouseX = 0;
-		this.mosueY = 0;
+		this.mouseX = window.mouseX;
+		this.mouseY = window.mouseY;
 
 		window.onkeydown = (key) => {
 			if (!this.keys[key.code]) {

@@ -3,11 +3,11 @@ let Entity2D = class {
 		let w = dimensions.width,
 		    h = dimensions.height;
 
-		pivot = pivot || new Position2D( w / 2, h );
+		pivot = pivot || new Point2D( w / 2, h );
 		
 		this.collider = new Collider2D(position, dimensions, angle, pivot);
 
-		this.velocity = new Position2D(0, 0);
+		this.velocity = new Point2D(0, 0);
 
 		this.acceleration = 0;
 		this.friction = 0;
@@ -59,6 +59,41 @@ let Entity2D = class {
 		}
 	}
 
+	separate (other) {
+		// https://www.sololearn.com/en/compiler-playground/WPmcR2CPfaIU
+		// line: 2029
+
+		let centerX = other.position.x + other.size.width / 2;
+		let centerY = other.position.y + other.size.height / 2;
+
+		let dx = this.position.x - centerX;
+		let dy = this.position.y - centerY;
+
+		// https://stackoverflow.com/a/22440044/22146374
+		let x1 = Math.max(this.position.x, other.position.x);
+		let y1 = Math.max(this.position.y, other.position.y);
+		let x2 = Math.min(this.position.x + this.size.width, other.position.x + other.size.width);
+		let y2 = Math.min(this.position.y + this.size.height, other.position.y + other.size.height);
+
+		let interRect = {
+			x: x1,
+			y: y1,
+			width: x2 - x1,
+			height: y2 - y1
+		};
+
+		let vx = interRect.width * Math.sign(dx);
+		let vy = interRect.height * Math.sign(dy);
+
+		if (interRect.width < interRect.height) {
+			this.position.x += vx;
+			return new Point2D(1, 0);
+		} else {
+			this.position.y += vy;
+			return new Point2D(0, 1);
+		}
+	};
+
 	// =================================================
 
 	applyGravity (gravity) {
@@ -99,11 +134,11 @@ let Entity3D = class extends Entity2D {
 		    h = dimensions.height,
 			l = dimensions.length;
 
-		pivot = pivot || new Position3D( w / 2, h / 2, l / 2 );
+		pivot = pivot || new Point3D( w / 2, h / 2, l / 2 );
 		
 		this.collider = new Collider3D(position, dimensions, angle, pivot);
 
-		this.velocity = new Position3D(0, 0, 0);
+		this.velocity = new Point3D(0, 0, 0);
 
 		this.acceleration = 0;
 		this.friction = 0;
@@ -137,6 +172,61 @@ let Entity3D = class extends Entity2D {
 
 	// =================================================
 
+	separate (other) {
+		// https://www.sololearn.com/en/compiler-playground/WPmcR2CPfaIU
+		// line: 2029
+
+		let centerX = other.x + other.width / 2;
+		let centerY = other.y + other.height / 2;
+		let centerZ = other.z + other.length / 2;
+
+		let dx = this.x - centerX;
+		let dy = this.y - centerY;
+		let dz = this.z - centerZ;
+
+		// https://stackoverflow.com/a/22440044/22146374
+		let x1 = Math.max(this.x, other.x);
+		let y1 = Math.max(this.y, other.y);
+		let z1 = Math.max(this.z, other.z);
+		let x2 = Math.min(this.x + this.width, other.x + other.width);
+		let y2 = Math.min(this.y + this.height, other.y + other.height);
+		let z2 = Math.min(this.z + this.length, other.z + other.length);
+
+		let interRect = {
+			x: x1,
+			y: y1,
+			width: x2 - x1,
+			height: y2 - y1,
+			length: z2 - z1
+		};
+
+		let vx = interRect.width * Math.sign(dx);
+		let vy = interRect.height * Math.sign(dy);
+		let vz = interRect.length * Math.sign(dz);
+
+		// let x = 0;
+		// let y = 0;
+		// let z = 0;
+
+		if (interRect.width < interRect.height && interRect.width < interRect.length) {
+			this.position.x += vx;
+			console.log(this, other, "Checked Width")
+			return new Point3D(1, 0, 0);
+		} else if (interRect.height < interRect.width && interRect.height < interRect.length) {
+			this.position.y += vy;
+			console.log(this, other, "Checked Height")
+			return new Point3D(0, 1, 0);
+		} else if (interRect.length < interRect.width && interRect.length < interRect.height) {
+			this.position.z += vz;
+			console.log(this, other, "Checked Length")
+			return new Point3D(0, 0, 1);
+		}
+
+		return new Point3D(0, 0, 0);
+	};
+
+	// =================================================
+
 	applyGravity (gravity) {
 		this.velocity.x += gravity.x;
 		this.velocity.y += gravity.y;
@@ -166,7 +256,7 @@ let Merc = class extends Entity3D {
 	constructor (position, mercID) {
 		let merc = Merc.Class[mercID];
 
-		super (position, new Dim3D(merc.width, merc.height, merc.length));
+		super (position, new Dim3D(merc.width, merc.height, merc.length), new Point2D(0, 0), new Point3D(merc.width / 2, merc.height, merc.length / 2));
 
 		this.mercID = mercID;
 		this.acceleration = merc.acceleration;
@@ -178,9 +268,19 @@ let Merc = class extends Entity3D {
 		this.health = merc.healthMax;
 		this.healthMax = merc.healthMax;
 		
-		this.item = new ScatterGun(this, 32, 6);
-		this.itemSlots = [];
+		this.itemIndex = 0;
+		this.itemSlots = [new ScatterGun(this, 32, 6), new Bat()];
 	};
+	
+	// =================================================
+
+	get item () {
+		return this.itemSlots[this.itemIndex];
+	}
+
+	set item (value) {
+		this.itemSlots[this.itemIndex] = value;
+	}
 	
 	// =================================================
 
@@ -207,8 +307,8 @@ let Merc = class extends Entity3D {
 		switch (other.constructor.name) {
 			case "Bullet":
 				this.heal(other.damage * -1);
-				this.velocity.x += Math.cos(utils_ToRadians(other.angleX)) * other.damage;
-				this.velocity.z += Math.sin(utils_ToRadians(other.angleX)) * other.damage;
+				this.velocity.x += Math.cos(toRadians(other.angleX)) * other.damage;
+				this.velocity.z += Math.sin(toRadians(other.angleX)) * other.damage;
 				other.destroy();    // In case if it doesn't get deleted, somehow
 				game.playSound("hitsound");
 				break;
@@ -218,6 +318,7 @@ let Merc = class extends Entity3D {
 				this.layer.remove(other);
 				break;
 			case "AmmoPack":
+				if (!this.item.ammo) break;
 				if (this.item.ammo >= this.item.ammoSize) break;
 				this.item.collect(other.ammo);
 				this.layer.remove(other);
@@ -250,6 +351,22 @@ let Merc = class extends Entity3D {
 		let lm = game.input.isMouseClicked(0);
 		let rm = game.input.isMouseClicked(1);
 
+		let slot1 = game.input.isKeyPressed("Digit1");
+		let slot2 = game.input.isKeyPressed("Digit2");
+		let slot3 = game.input.isKeyPressed("Digit3");
+
+		if (slot1) {
+			this.itemIndex = 0;
+		}
+		else if (slot2) {
+			this.itemIndex = 1;
+		}
+		else if (slot3) {
+			this.itemIndex = 2;
+		}
+		
+		this.itemIndex = clamp(this.itemIndex, 0, this.itemSlots.length - 1);
+
 		if (this.item != null) {
 			if (lm) {
 				this.item.attack1(this);
@@ -259,7 +376,9 @@ let Merc = class extends Entity3D {
 		}
 
 		if (reload) {
-			this.item.reload();
+			if (this.item.reload) {
+				this.item.reload();
+			}
 		}
 
 		let dirX = (right - left);
@@ -269,16 +388,16 @@ let Merc = class extends Entity3D {
 		this.velocity.x += dirX * this.acceleration;
 		this.velocity.z += dirZ * this.acceleration;
 
-		this.velocity.x = utils_clamp(this.velocity.x, this.speedMax * -1, this.speedMax);
-		this.velocity.z = utils_clamp(this.velocity.z, this.speedMax * -1, this.speedMax);
+		this.velocity.x = clamp(this.velocity.x, this.speedMax * -1, this.speedMax);
+		this.velocity.z = clamp(this.velocity.z, this.speedMax * -1, this.speedMax);
 
 		// Friction
 		if (!left && !right && Math.floor(this.velocity.x) != 0) {
-			this.velocity.x -= this.friction * utils_dot(this.velocity.x);
+			this.velocity.x -= this.friction * Math.sign(this.velocity.x);
 		};
 		
 		if (!up && !down && Math.floor(this.velocity.z) != 0) {
-			this.velocity.z -= this.friction * utils_dot(this.velocity.z);
+			this.velocity.z -= this.friction * Math.sign(this.velocity.z);
 		};
 
 		// Jump
@@ -293,13 +412,19 @@ let Merc = class extends Entity3D {
 		// Gravity
 		this.applyGravity({x:0, y:0.25, z:0});
 
-		this.isColliding("Block", (block) => {
-			if (this.velocity.y > 0) {
-				this.velocity.y = 0;
-				this.y = block.y;
-				this.jumps = Merc.Class[this.mercID].jumps;
-			}
-		});
+		// this.isColliding("Block", (block) => {
+		// 	let v = this.separate(block);
+			
+		// 	if (v.x) this.velocity.x = 0;
+		// 	if (v.y) this.velocity.y = 0;
+		// 	if (v.z) this.velocity.z = 0;
+		// });
+
+		if (this.position.y > 0) {
+			this.position.y = 0;
+			this.velocity.y = 0;
+			this.jumps = Merc.Class[this.mercID].jumps;
+		}
 	};
 
 	render (context) {
@@ -308,12 +433,24 @@ let Merc = class extends Entity3D {
 		context.fillText(this.health, this.x - this.width / 2, (this.z + this.y) - this.height);
 
 		if (this.item != null) {
+			let x = this.x + -this.collider.pivot.x;
+			let y = this.y + -this.collider.pivot.y;
+			let z = this.z + -this.collider.pivot.z;
+
+			let position = new Point2D(x + this.width * 1.30, z + y + this.height);
+			let angle = Math.atan2(game.input.mouseY - position.y, game.input.mouseX - position.x);
+			let scaleX = Math.sign(toRadians(angle));
+			let scaleY = 1;
+
+			position.x += Math.cos(angle) * 15;
+			position.y += Math.sin(angle) * 15;
+
 			this.item.render(
 				context,
-				{
-					x: this.x + this.width / 2,
-					y: (this.z + this.y) - this.height
-				}
+				position,
+				angle,
+				scaleX,
+				scaleY
 			);
 		};
 	};
@@ -337,32 +474,30 @@ let Bullet = class extends Entity3D {
 	// =================================================
 
 	update (game) {
-		let dirX = Math.cos(utils_ToRadians(this.angleX)) * this.speed;
-		let dirZ = Math.sin(utils_ToRadians(this.angleX)) * this.speed;
+		let dirX = Math.cos(toRadians(this.angleX)) * this.speed;
+		let dirZ = Math.sin(toRadians(this.angleX)) * this.speed;
 
 		this.x += dirX;
 		this.z += dirZ;
 	};
 
 	render (context) {
-		let dirX = Math.cos(utils_ToRadians(this.angleX)) * this.speed / 2;
-		let dirZ = Math.sin(utils_ToRadians(this.angleX)) * this.speed / 2;
+		let dirX = Math.cos(toRadians(this.angleX)) * this.speed / 2;
+		let dirZ = Math.sin(toRadians(this.angleX)) * this.speed / 2;
 
 		context.lineWidth = 4;
 
 		context.strokeStyle = "rgba(0,0,0,0.5)";
-		context.beginPath();
-		context.moveTo(this.x - dirX, this.z - dirZ);
-		context.lineTo(this.x + dirX, this.z + dirZ);
-		context.stroke();
-		context.closePath();
+		context.strokeLine(
+			this.x - dirX, this.z - dirZ,
+			this.x + dirX, this.z + dirZ
+		);
 
 		context.strokeStyle = "yellow";
-		context.beginPath();
-		context.moveTo(this.x - dirX, (this.z - dirZ) + this.y);
-		context.lineTo(this.x + dirX, (this.z + dirZ) + this.y);
-		context.stroke();
-		context.closePath();
+		context.strokeLine(
+			this.x - dirX, (this.z - dirZ) + this.y,
+			this.x + dirX, (this.z + dirZ) + this.y
+		);
 		
 		context.lineWidth = 1;
 	};
@@ -370,7 +505,7 @@ let Bullet = class extends Entity3D {
 
 let Spawner = class extends Entity3D {
 	constructor (position, object, timer) {
-		super (position, new Dim3D(32, 10, 24), new Position2D(0, 0));
+		super (position, new Dim3D(32, 10, 24), new Point2D(0, 0));
 		this.object = object;
 
 		// Instant spawn
@@ -397,14 +532,10 @@ let Spawner = class extends Entity3D {
 		if (this.timer >= this.timerMax) {
 			this.timer = 0;
 
-			// console.log(isColliding);
-
-			// if (!isColliding) {
 			let index = this.layer.add( Object.create(this.object) );
 			index -= 1;
 
 			this.layer.objects[index].position = this.position;
-			// }
 		}
 	};
 
@@ -422,7 +553,7 @@ let Spawner = class extends Entity3D {
 
 let HealthPack = class extends Entity3D {
 	constructor (position, health = 50) {
-		super (position, new Dim3D(32, 10, 24), new Position2D(0, 0));
+		super (position, new Dim3D(32, 10, 24), new Point2D(0, 0));
 		this.health = health;
 		this.sprite = game.getImage("medkit");
 	};
@@ -443,11 +574,7 @@ let HealthPack = class extends Entity3D {
 		let z = this.z - this.collider.pivot.z;
 		let t = Math.sin(game.ticks / 20) * 4;
 
-		context.fillStyle = "rgba(0,0,0,0.5)";
-		context.beginPath();
-		context.arc(this.x, this.z + 5, 12.5, 0, 2 * Math.PI);
-		context.fill();
-		context.closePath();
+		renderShadow(context, this.x, this.z + 5, 12.5, 0.5);
 
 		context.drawImage(this.sprite, x, z + y - t);
 	};
@@ -455,7 +582,7 @@ let HealthPack = class extends Entity3D {
 
 let AmmoPack = class extends Entity3D {
 	constructor (position, ammo = 50) {
-		super (position, new Dim3D(32, 10, 24), new Position2D(0, 0));
+		super (position, new Dim3D(32, 10, 24), new Point2D(0, 0));
 		this.ammo = ammo;
 		this.sprite = game.getImage("ammo_pack");
 	};
@@ -476,11 +603,7 @@ let AmmoPack = class extends Entity3D {
 		let z = this.z - this.collider.pivot.z;
 		let t = Math.sin(game.ticks / 20) * 4;
 
-		context.fillStyle = "rgba(0,0,0,0.5)";
-		context.beginPath();
-		context.arc(this.x, this.z + 5, 12.5, 0, 2 * Math.PI);
-		context.fill();
-		context.closePath();
+		renderShadow(context, this.x, this.z + 5, 12.5, 0.5);
 
 		context.drawImage(this.sprite, x, z + y - t);
 	};
@@ -530,10 +653,10 @@ let Gun = class extends Item {
 	};
 
 	collect (ammo) {
-		let collect = utils_clamp(ammo, 0, this.ammoSize);
+		let collect = clamp(ammo, 0, this.ammoSize);
 		let left = ammo - collect;
 		this.ammo += collect;
-		this.ammo = utils_clamp(this.ammo, 0, this.ammoSize);
+		this.ammo = clamp(this.ammo, 0, this.ammoSize);
 		return left;
 	};
 };
@@ -556,14 +679,14 @@ let ScatterGun = class extends Gun {
 		this.carried -= 1;
 
 		let angle = Math.atan2(
-			game.input.mouseY - user.z,
+			game.input.mouseY - (user.z + user.y),
 			game.input.mouseX - user.x
 		);
 
 		let dirX = Math.cos(angle) * (user.width + this.length);
 		let dirZ = Math.sin(angle) * (user.length + this.length);
 
-		angle = utils_ToDegrees(angle);
+		angle = toDegrees(angle);
 
 		let x = user.x + dirX;
 		let y = user.y - user.height / 2;
@@ -575,8 +698,8 @@ let ScatterGun = class extends Gun {
 			let _i = i * 10;
 			this.spawn(
 				new Bullet(
-					new Position3D(x, y, z),
-					new Position2D(angle + _i, 0),
+					new Point3D(x, y, z),
+					new Point2D(angle + _i, 0),
 					user
 				)
 			);
@@ -594,15 +717,52 @@ let ScatterGun = class extends Gun {
 
 	// =================================================
 
+	render (context, position, angle, scaleX, scaleY) {
+		let img = game.getImage("scattergun");
+
+		context.setOrigin(img.width / 2, img.height / 2);
+		context.setRotation(angle);
+		context.save();
+		context.applyOrigin(position);
+		// context.scale(scaleX, scaleY);
+		// context.translate(context.canvas.width * -1, 0);
+			context.drawImage(img, -img.width / 2, -img.width / 2);
+		context.restore();
+	};
+};
+
+let Bat = class extends Item {
+	constructor (user) {
+		super();
+		this.user = user;
+	};
+
+	// =================================================
+
+	attack1 (user) {
+		// let attackCollider = {
+		// 	x: user.x - user.width / 2,
+		// 	y: user.y - user.height,
+		// 	z: user.z - user.length / 2,
+		// 	width: user.width / 2,
+		// 	height: user.height,
+		// 	length: user.length
+		// };
+	};
+	attack2 (user) {};
+
+	// =================================================
+
+	update (game) {};
 	render (context, position) {
 		context.fillStyle = "white";
-		context.fillText("ScatterGun", position.x, position.y);
+		context.fillText("Bat", position.x, position.y);
 	};
 };
 
 let Block = class extends Entity3D {
-	constructor (position, dimensions, angle = new Position2D(0, 0)) {
-		super(position, dimensions, angle, new Position3D(0, 0, 0));
+	constructor (position, dimensions, angle = new Point2D(0, 0)) {
+		super(position, dimensions, angle, new Point3D(0, 0, 0));
 	};
 
 	// =================================================

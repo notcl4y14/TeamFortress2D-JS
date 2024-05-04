@@ -1,29 +1,41 @@
-let utils_clamp = function (val, min, max) {
+let clamp = function (val, min, max) {
 	if (val < min) return min;
 	if (val > max) return max;
 
 	return val;
 }
 
-let utils_dot = function (value) {
-	return value / Math.abs(value);
-}
-
-let utils_getDistance = function (x1, y1, x2, y2) {
+let getDistance = function (x1, y1, x2, y2) {
 	return Math.sqrt( Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2) );
 }
 
-let utils_ToRadians = function (deg) {
+let toRadians = function (deg) {
 	return deg * Math.PI / 180;
 }
 
-let utils_ToDegrees = function (rad) {
+let toDegrees = function (rad) {
 	return rad * 180 / Math.PI;
 }
 
-let utils_loadImage = function (src) {
+let loadImage = function (src) {
 	let img = new Image();
 	img.src = src;
 	// img.style.imageRendering = "pixelated";
+
+	// if (!img.complete) {
+	// 	throw `Image at ${src} is not found!`;
+	// }
+	
 	return img;
+}
+
+let renderShadow = function (context, x, y, radius, opacity) {
+	context.fillStyle = "rgba(0,0,0," + opacity + ")";
+	context.strokeStyle = "rgba(0,0,0,0)";
+	// context.beginPath();
+	// context.arc(x, y, radius, 0, 2 * Math.PI);
+	// context.fill();
+	// context.closePath();
+	context.circle(x, y, radius);
+	context.fill();
 }

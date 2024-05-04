@@ -1,7 +1,7 @@
 let Game = class {
 	constructor () {
 		this.canvas = document.getElementById("canvas");
-		this.context = this.canvas.getContext("2d");
+		this.context = new Context(this.canvas);
 
 		this.running = false;
 		this.ticks = 0;
@@ -14,15 +14,17 @@ let Game = class {
 				scattergun_reload: new Audio("assets/scatter_gun_reload.wav")
 			},
 			images: {
-				ammo_pack: utils_loadImage("assets/ammo_pack.png"),
-				medkit: utils_loadImage("assets/medkit.png")
+				ammo_pack: loadImage("assets/ammo_pack.png"),
+				medkit: loadImage("assets/medkit.png"),
+				scattergun: loadImage("assets/scattergun.png")
 			}
 		};
 		
 		this.soundBuffer = [];
 
 		this.settings = {
-			volume: 0.75
+			volume: 0.40,
+			fps_limit: 120
 		}
 
 		this.input = new Input();
@@ -35,8 +37,8 @@ let Game = class {
 		let game = this;
 
 		let l_main = this.layout.addLayer(0, "main");
-		l_main.add( new Merc( new Position3D(20, 10, 20), 0 ) );
-		l_main.add( new Bullet (new Position3D(500, 0, 500), new Position2D(180 + 45, 0) ) );
+		l_main.add( new Merc( new Point3D(70, -100, 70), 0 ) );
+		l_main.add( new Bullet (new Point3D(500, 0, 500), new Point2D(180 + 45, 0) ) );
 
 		// Looks like 1 second is 60 ticks, although this might depend on performance
 		// P.S. I used stopwatch to get that :P
@@ -46,33 +48,24 @@ let Game = class {
 		let second = 60;
 		let minute = second * 60;
 
-		l_main.add( new Spawner( new Position3D(500, 0, 200), new HealthPack( new Position3D(500, 0, 200) ), minute ) );
-		l_main.add( new Spawner( new Position3D(540, 0, 200), new AmmoPack( new Position3D(540, 0, 200) ), minute ) );
-		l_main.add( new Block( new Position3D(10, 0, 10), new Dim3D(32, 32, 32) ) );
+		l_main.add( new Spawner( new Point3D(500, 0, 200), new HealthPack( new Point3D(500, 0, 200) ), second * 20 ) );
+		l_main.add( new Spawner( new Point3D(540, 0, 200), new AmmoPack( new Point3D(540, 0, 200) ), second * 20 ) );
 
-		// let l_gui = this.layout.addLayer(10, "GUI");
-		// l_gui.add( new HealthBar(
-		// 	new Position2D(2, game.canvas.height - 50),
-		// 	new Dim2D(10, 50),
-		// 	l_main.objects[0],
-		// 	function (game) {
-		// 		return 2;
-		// 	},
-		// 	function (game) {
-		// 		return game.canvas.height - 52;
-		// 	}
-		// ) );
-		// l_gui.add( new AmmoHUD(
-		// 	new Position2D(40, game.canvas.height - 50),
-		// 	new Dim2D(10, 50),
-		// 	l_main.objects[0].item,
-		// 	function (game) {
-		// 		return 18;
-		// 	},
-		// 	function (game) {
-		// 		return game.canvas.height - 52;
-		// 	}
-		// ) );
+		let l_gui = this.layout.addLayer(10, "GUI");
+		l_gui.add( new HealthBar(
+			new Point2D(2, game.canvas.height - 50),
+			new Dim2D(10, 50),
+			l_main.objects[0],
+			(game) => 2,
+			(game) => game.canvas.height - 52,
+		) );
+		l_gui.add( new AmmoHUD(
+			new Point2D(40, game.canvas.height - 50),
+			new Dim2D(10, 50),
+			l_main.objects[0].item,
+			(game) => 18,
+			(game) => game.canvas.height - 52,
+		) );
 	}
 		
 	// =================================================
@@ -88,10 +81,6 @@ let Game = class {
 		let index = this.soundBuffer.push( sound.cloneNode() ) - 1;
 		this.soundBuffer[index].volume = this.settings.volume;
 		this.soundBuffer[index].play();
-		
-		// this.soundBuffer[index].onplayed = () => {
-		// 	game.soundBuffer.splice(index, 1);
-		// }
 
 		this.checkSound( this.soundBuffer[index] );
 	};
@@ -125,6 +114,7 @@ let Game = class {
 		this.update ();
 		this.render (this.context);
 
+		// window.requestAnimationFrame (setInterval(() => this.loop(), this.fps_limit));
 		window.requestAnimationFrame (() => this.loop());
 	};
 
@@ -134,17 +124,12 @@ let Game = class {
 	};
 	
 	render (context) {
-		context.fillStyle = "cornflowerblue";
+		context.fillStyle = "rgb(0,50,100)";
 		context.fillRect(0, 0, context.canvas.width, context.canvas.height);
 
 		this.layout.render(context);
 
-		// let ammo = this.layout.getLayer("main").objects[0].item.ammo;
-		// let carried = this.layout.getLayer("main").objects[0].item.carried;
-
-		// context.fillStyle = "black";
-		// context.fillText(ammo + ":" + carried, 0, 10);
-
+		context.fillStyle = "white";
 		context.fillText("Volume: " + this.settings.volume * 100 + "%", 350, 100);
 		context.fillText("To change it: open console and type `game.settings.volume = 0.50`", 350, 110);
 		context.fillText("This changes the volume to 50%, you can choose from 0 to 0.50 to 1", 350, 120);

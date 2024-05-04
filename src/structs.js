@@ -1,9 +1,9 @@
-let Position2D = function (x, y) {
+let Point2D = function (x, y) {
 	this.x = x;
 	this.y = y;
 };
 
-let Position3D = function (x, y, z) {
+let Point3D = function (x, y, z) {
 	this.x = x;
 	this.y = y;
 	this.z = z;
